@@ -8,6 +8,8 @@ Run Globus Connect Personal in a Docker container.
 # Run with gui
 docker build -t globus .
 # You can change the volume to point to your data
+docker run -it --rm --name globus --volume $HOME/Datasets:/home/appuser/data globus
+# Run with gui
 docker run -it --rm --name globus -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --volume $HOME/Datasets:/home/appuser/data globus
 
 # Run with gui
