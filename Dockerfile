@@ -11,6 +11,21 @@ RUN chown appuser:appuser /home/appuser
 USER appuser
 WORKDIR /home/appuser/
 
+ARG TARGETARCH
+
 # Install Globus Connect Personal client
-RUN wget https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz
-RUN tar xzf globusconnectpersonal-latest.tgz
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        wget -O globusconnectpersonal-latest.tar.gz https://downloads.globus.org/globus-connect-personal/linux/stable/globusconnectpersonal-latest.tgz; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        wget -O globusconnectpersonal-latest.tar.gz https://downloads.globus.org/globus-connect-personal/linux_aarch64/stable/globusconnectpersonal-aarch64-latest.tgz; \
+    else \
+        echo "Unsupported architecture: $TARGETARCH"; exit 1; \
+    fi && \
+    tar -xzf globusconnectpersonal-latest.tar.gz && \
+    rm globusconnectpersonal-latest.tar.gz && \
+    mv globusconnectpersonal-*/ /home/appuser/globus;
+
+WORKDIR /home/appuser/globus
+VOLUME /home/appuser/data
+
+CMD ["./globusconnectpersonal"]
