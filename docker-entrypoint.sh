@@ -1,8 +1,32 @@
 #! /bin/bash
+# Start globusconnectpersonal
+#
+# For normal running a `.globusonline` directory is required containing configuration
+# and keys. This can be mounted (writable, with owner 1001) or else copied from a
+# supplied $GLOBUSONLINE_TGZ.
+#
+# If no configuration is found, the container will run in `-setup` mode. This requires
+# either an interactive session or else the $SETUP_KEY variable; See
+# https://docs.globus.org/globus-connect-personal/troubleshooting-guide/#generating-gcp-setup-key
+#
+# Variables:
+# - SETUP_KEY: Run setup process (setup only)
+# - DESCRIPTION: Endpoint description (setup only)
+# - VERBOSE: [yes|NO] enable debugging
+# - GLOBUSONLINE_TGZ: path to a tarball, which will be expanded in the home directory.
+#                     Useful for providing a .globusonline/lta directory with config files.
+#                     Default: /globusonline.tgz
+
 set -euo pipefail
 shopt -s nocasematch
 
+
 GCP=/globus/globusconnectpersonal
+
+# Untar config files if specified
+if [[ -f "${GLOBUSONLINE_TGZ:-/globusonline.tgz}" ]]; then
+    tar --no-xattrs --no-acls --exclude="._*" -xzf "${GLOBUSONLINE_TGZ:-/globusonline.tgz}" -C /home/appuser/;
+fi
 
 # Do setup
 if ! [ -f /home/appuser/.globusonline/lta/client-id.txt ]; then
@@ -25,7 +49,6 @@ if ! [ -f /home/appuser/.globusonline/lta/client-id.txt ]; then
         cat /home/appuser/.globusonline/lta/register.log;
         exit 1
     }
-
 fi
 
 # Start GCP
@@ -45,4 +68,5 @@ else
 fi
 
 echo "RUN ${args[*]}"
+$GCP -version
 exec "${args[@]}"

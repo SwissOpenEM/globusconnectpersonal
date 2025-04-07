@@ -32,15 +32,38 @@ docker run -it --name gpc --env-file .env \
 If you see an error 'Setup Code XXX not found' this generally indicates that the setup
 key has expired. Keys are only valid for one use. An interactive terminal (`-it`) seems to be required for setup, but is not needed on later runs of the container.
 
-Rather than persisting the container, you can also mount the ~/.globusonline directory
-as a volume to persist setup information across container restarts.
+Rather than persisting the container, you can also mount a tar file containing the
+contents of the ~/.globusonline directory to persist setup information across container
+restarts. Globus requires files in ~/.globusonline to be owned by a non-root user,
+so directly mounting `.globusonline` fails. The tarball should contain the following files:
+
+```sh
+$ tar tzf globusonline.tgz
+.globusonline/
+.globusonline/lta/
+.globusonline/lta/client-id.txt
+.globusonline/lta/relay-known-hosts.txt
+.globusonline/lta/ftp-key2.pem
+.globusonline/lta/config
+.globusonline/lta/relay-anonymous-key.pem
+.globusonline/lta/v2done.txt
+.globusonline/lta/ftp-cert2.pem
+.globusonline/lta/config-audit
+.globusonline/lta/client-key.pem
+.globusonline/lta/gridmap
+```
+
+Mount it as follows:
 
 ```sh
 docker run -it --rm --name gpc --env-file .env \
     --volume $PWD/data:/home/appuser/data \
-    --volume $PWD/.globusonline:/home/appuser/.globusonline \
+    --volume $PWD/globusonline.tgz:/globusonline.tgz \
     globuspersonalconnect
 ```
+
+The path within the container can also be set if needed using the `GLOBUSONLINE_TGZ`
+environment variable (see docker-entrypoint.sh).
 
 ## GUI
 *TODO needs update*
