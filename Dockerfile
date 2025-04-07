@@ -11,7 +11,9 @@ VOLUME /home/appuser/data
 
 # Install dependencies
 RUN apt update && \
-    apt install -y --no-install-recommends tk tcllib wget python3 python3-pip python3-tk && \
+    apt install -y --no-install-recommends python3 python3-pip \
+        tk tcllib python3-tk \
+        wget curl telnet netcat-openbsd && \
     apt clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
