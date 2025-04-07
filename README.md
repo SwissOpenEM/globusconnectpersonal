@@ -24,46 +24,40 @@ Setup works best using a [GCP Setup Key](https://docs.globus.org/globus-connect-
 4. Run the container:
 
 ```sh
-docker run -it --name gpc --env-file .env \
+docker run -it --name gcp --env-file .env \
     --volume $PWD/data:/home/appuser/data \
     globuspersonalconnect
 ```
 
 If you see an error 'Setup Code XXX not found' this generally indicates that the setup
-key has expired. Keys are only valid for one use. An interactive terminal (`-it`) seems to be required for setup, but is not needed on later runs of the container.
+key has expired. Keys are only valid for one use. An interactive terminal (`-it`) seems
+to be required for setup, but is not needed on later runs of the container.
 
-Rather than persisting the container, you can also mount a tar file containing the
-contents of the ~/.globusonline directory to persist setup information across container
-restarts. Globus requires files in ~/.globusonline to be owned by a non-root user,
-so directly mounting `.globusonline` fails. The tarball should contain the following files:
+Persisting the globus settings is done by seeding the `~/.globusonline` directory from a
+tar file during the container startup. From the setup instance, save the settings as
+follows:
 
-```sh
-$ tar tzf globusonline.tgz
-.globusonline/
-.globusonline/lta/
-.globusonline/lta/client-id.txt
-.globusonline/lta/relay-known-hosts.txt
-.globusonline/lta/ftp-key2.pem
-.globusonline/lta/config
-.globusonline/lta/relay-anonymous-key.pem
-.globusonline/lta/v2done.txt
-.globusonline/lta/ftp-cert2.pem
-.globusonline/lta/config-audit
-.globusonline/lta/client-key.pem
-.globusonline/lta/gridmap
+```
+docker exec gcp tar cz .globusonline > globusonline.tgz
 ```
 
-Mount it as follows:
+Globus requires files in ~/.globusonline to be owned by a non-root user,
+so directly mounting `.globusonline` as a volume fails.
+
+## Running
+
+After the initial setup, start the container as follows:
 
 ```sh
-docker run -it --rm --name gpc --env-file .env \
+docker run -it --rm --name gcp --env-file .env \
     --volume $PWD/data:/home/appuser/data \
     --volume $PWD/globusonline.tgz:/globusonline.tgz \
     globuspersonalconnect
 ```
 
-The path within the container can also be set if needed using the `GLOBUSONLINE_TGZ`
-environment variable (see docker-entrypoint.sh).
+GPC will start using the previously saved `.globusonline` directory. The tarball path
+within the container can also be set if needed using the `GLOBUSONLINE_TGZ` environment
+variable (see docker-entrypoint.sh).
 
 ## GUI
 *TODO needs update*
@@ -72,9 +66,9 @@ The image contains python and Tk packages, allowing gui usage:
 
 ```sh
 # You can change the volume to point to your data
-docker run -it --rm --name gpc --volume $HOME/Datasets:/home/appuser/data globuspersonalconnect
+docker run -it --rm --name gcp --volume $HOME/Datasets:/home/appuser/data globuspersonalconnect
 # Run with gui
-docker run -it --rm --name gpc -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --volume $HOME/Datasets:/home/appuser/data globuspersonalconnect
+docker run -it --rm --name gcp -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --volume $HOME/Datasets:/home/appuser/data globuspersonalconnect
 
 # Run with gui
 cd /globus # or whatever version you have

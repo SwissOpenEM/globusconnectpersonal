@@ -1,4 +1,5 @@
 /.idea/
 .env
 *globusonline
+*globusonline.tgz
 /data
