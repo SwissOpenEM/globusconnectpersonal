@@ -25,7 +25,12 @@ GCP=/globus/globusconnectpersonal
 
 # Untar config files if specified
 if [[ -f "${GLOBUSONLINE_TGZ:-/globusonline.tgz}" ]]; then
+    echo "INFO Expanding ${GLOBUSONLINE_TGZ:-/globusonline.tgz}"
     tar --no-xattrs --no-acls --exclude="._*" -xzf "${GLOBUSONLINE_TGZ:-/globusonline.tgz}" -C /home/appuser/;
+    [[ -d /home/appuser/.globusonline/lta/client-id.txt ]] ||
+        echo "Warning: No client-id.txt found after expanding ${GLOBUSONLINE_TGZ:-/globusonline.tgz}. Does the tar file contain .globusonline/lta/*?"
+    # Fix permissions for ssh
+    chmod go-rw /home/appuser/.globusonline/lta/*.pem
 fi
 
 # Do setup
